@@ -120,6 +120,7 @@ c2.Divide(2, 1)
 
 c2.cd(1)
 hist.Draw('colz')
+#hist.Draw('lego')
 
 ### find the position of peak
 maxBinContent = 0
@@ -137,6 +138,8 @@ max_x = hist.GetXaxis().GetBinCenter(maxBin_x)
 max_y = hist.GetYaxis().GetBinCenter(maxBin_y)
 
 print 'theta: ', max_x, 'rho', max_y
+print hist.GetBinContent( hist.GetMaximumBin() )
+print 'max: ', maxBinContent
 
 #########
 xpos = [hit[0] for hit in hits_pos]

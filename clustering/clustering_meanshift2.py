@@ -42,16 +42,33 @@ maxEvt = 100
 skip = 0
 quantile = 0.02
 shift = 100
+
+# the limits for selecting clusters
+minClusterSize = 1
+maxClusterSize = 50
+
+printOut = False
 ####################
+
+if len(sys.argv) == 4:
+	fileName = sys.argv[1]
+	minClusterSize = int(sys.argv[2])
+	maxClusterSize = int(sys.argv[3])
+	
+	if minClusterSize > maxClusterSize:
+		minClusterSize, maxClusterSize = maxClusterSize, minClusterSize
+
+if len(sys.argv) == 2:
+	fileName = sys.argv[1]
 
 if len(sys.argv) == 1:
 	fileName = "PDG211_50GeV_endcap_rec_0.slcio"
-	print 'default file: ', fileName
-else:
-	fileName = sys.argv[1]
+
 
 eventNumber = 1
 reader = LcioReader( fileName )
+print 'Loaded file: ', fileName
+
 event = None
 
 ########################################
@@ -102,42 +119,10 @@ for event in reader:
 		continue
 
 	########################################################################################################################
-	#plt.style.use(['classic', 'seaborn-paper'])
-	#plt.style.use(['seaborn-notebook'])
-	plt.style.use(['seaborn-talk'])
-
-	fig = plt.figure()
-	#ax = fig.gca(projection='3d')
-	ax = fig.add_subplot(111, projection='3d')
+	#plt.style.use(['classic'])
+	plt.style.use(['seaborn-notebook'])
 
 	Xdata = StandardScaler().fit_transform(allHitPos)
-
-	######
-	"""
-	connectivity = kneighbors_graph(Xdata, n_neighbors=2, include_self=False)
-	connectivity = 0.5 * (connectivity + connectivity.T)
-	ncluster = 10
-	average_linkage = cluster.AgglomerativeClustering( linkage="average", affinity="l2", n_clusters=ncluster, connectivity=connectivity )
-	average_linkage.fit(Xdata)
-	y_pred = average_linkage.labels_.astype(np.int)
-	"""
-	######
-
-	######
-	"""
-	dbscan = cluster.DBSCAN(eps=0.8)
-	dbscan.fit(Xdata)
-	y_pred = dbscan.labels_.astype(np.int)
-	"""
-	######
-
-	######
-	"""
-	two_means = cluster.MiniBatchKMeans(n_clusters=2)
-	two_means.fit(Xdata)
-	y_pred = two_means.labels_.astype(np.int)
-	"""
-	######
 
 	######
 	bandwidth = cluster.estimate_bandwidth(Xdata, quantile=quantile)
@@ -155,20 +140,14 @@ for event in reader:
 	yPos = [x[1] for x in Xdata]
 	zPos = [x[2] for x in Xdata]
 
-	ax.set_xlabel('X (mm)')
-	ax.set_ylabel('Y (mm)')
-	ax.set_zlabel('Z (mm)')
-
-
-	#ax.scatter(xPos, yPos, zPos, c=colors[y_pred], marker='o')
-	#plt.show()
-
 	hitClusters = list(y_pred)
-	print 'max: ', max(hitClusters)
 
-	clusters10 = []
+	clustersSelected = []
+	cluColor = []
 
 	iClu = 0
+	
+	
 	while True:
 		hitsNum = hitClusters.count(iClu)
 
@@ -178,22 +157,46 @@ for event in reader:
 		allHits = len(hitClusters)
 
 		idx = [i for i in range(allHits) if hitClusters[i] == iClu]
-		print '----> Cluster ', iClu, ': hits number: ', hitsNum, ' =================== '
-	   	print idx, '\n'
+		
+		if printOut:
+			print '----> Cluster ', iClu, ': hits number: ', hitsNum, ' =================== '
+			print idx, '\n'
 
-		if hitsNum > 1 and hitsNum < 100:
+		###########################################
+		# select clusters to show by hit number
+		###########################################
+		if hitsNum > minClusterSize and hitsNum < maxClusterSize:
 			hitPos = [Xdata[i] for i in idx]
 			for pos in hitPos:
-				clusters10.append( pos )
+				clustersSelected.append( pos )
+				cluColor.append(iClu)
 
 		iClu = iClu + 1
 
-	# redraw
-	#print clusters10
-	xPos = [x[0] for x in clusters10]
-	yPos = [x[1] for x in clusters10]
-	zPos = [x[2] for x in clusters10]
-	ax.scatter(xPos, yPos, zPos, marker='o')
+	#print clustersSelected
+	xPos = [x[0] for x in clustersSelected]
+	yPos = [x[1] for x in clustersSelected]
+	zPos = [x[2] for x in clustersSelected]
+
+	f, (ax1, ax2, ax3)  = plt.subplots(1, 3)
+	f.tight_layout()
+
+	markerSize = 30
+
+	ax1.scatter(xPos, zPos, c=colors[cluColor], marker='.', s=markerSize)
+	ax1.set_xlabel('X (mm)')
+	ax1.set_ylabel('Z (mm)')
+
+	ax2.scatter(yPos, zPos, c=colors[cluColor], marker='.', s=markerSize)
+	ax2.set_xlabel('Y (mm)')
+	ax2.set_ylabel('Z (mm)')
+
+	ax3 = f.add_subplot(1, 3, 3, projection='3d')
+	ax3.scatter(xPos, yPos, zPos, c=colors[cluColor], marker='.', s=markerSize)
+	ax3.set_xlabel('X (mm)')
+	ax3.set_ylabel('Y (mm)')
+	ax3.set_zlabel('Z (mm)')
+
 	plt.show()
 
 	text = raw_input('enter to next event: ')
