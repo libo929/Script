@@ -40,7 +40,7 @@ from itertools import cycle, islice
 ####################
 maxEvt = 100
 skip = 0
-quantile = 0.02
+quantile = 0.006
 shift = 100
 
 # the limits for selecting clusters
@@ -80,7 +80,7 @@ skip = 2 * skip
 maxEvt = 2 * maxEvt
 
 # due to the shift in x and y direction
-shift = 150 / 1.41
+shift = shift / 1.41
 ########################################
 
 
@@ -184,18 +184,18 @@ for event in reader:
 	markerSize = 30
 
 	ax1.scatter(xPos, zPos, c=colors[cluColor], marker='.', s=markerSize)
-	ax1.set_xlabel('X (mm)')
-	ax1.set_ylabel('Z (mm)')
+	ax1.set_xlabel('X')
+	ax1.set_ylabel('Z')
 
 	ax2.scatter(yPos, zPos, c=colors[cluColor], marker='.', s=markerSize)
-	ax2.set_xlabel('Y (mm)')
-	ax2.set_ylabel('Z (mm)')
+	ax2.set_xlabel('Y')
+	ax2.set_ylabel('Z')
 
 	ax3 = f.add_subplot(1, 3, 3, projection='3d')
 	ax3.scatter(xPos, yPos, zPos, c=colors[cluColor], marker='.', s=markerSize)
-	ax3.set_xlabel('X (mm)')
-	ax3.set_ylabel('Y (mm)')
-	ax3.set_zlabel('Z (mm)')
+	ax3.set_xlabel('X')
+	ax3.set_ylabel('Y')
+	ax3.set_zlabel('Z')
 
 	plt.show()
 
