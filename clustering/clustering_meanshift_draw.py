@@ -36,13 +36,22 @@ from itertools import cycle, islice
 
 import sys
 
+
+pointColor = {1: ROOT.kRed, 2: ROOT.kGreen, 3: ROOT.kBlue, 4: ROOT.kYellow, 5: ROOT.kMagenta, 6: ROOT.kCyan, 7: ROOT.kOrange, 8: ROOT.kSpring, 9: ROOT.kTeal, 10: ROOT.kAzure}
+
+rnd = ROOT.TRandom(0)
+
 #########################################
 def drawPoints(allHitPos, evtNum):
 	ps = ROOT.TEvePointSet()
 	ps.SetOwnIds(ROOT.kTRUE)
 	ps.SetMarkerSize(1)
 	ps.SetMarkerStyle(4)
-	ps.SetMarkerColor(2)
+
+	rc = int(rnd.Uniform(1,10.9))
+	#print rc
+	pcolor = pointColor[rc]
+	ps.SetMarkerColor(pcolor)
 
 	evtName = 'SDHCAL event ' + str(evtNum)
 	evt = TEveEventManager(evtName, "")
@@ -73,8 +82,12 @@ def drawClusters(hitClusters, evtNum):
 		ps.SetOwnIds(ROOT.kTRUE)
 		ps.SetMarkerSize(1)
 		ps.SetMarkerStyle(4)
-		ps.SetMarkerColor(2)
-		print 'cluster: ', len(hitCluster)
+		rc = int(rnd.Uniform(1,10.9))
+		pcolor = pointColor[rc]
+		#print rc, pcolor
+		ps.SetMarkerColor(pcolor)
+		#ps.SetMarkerColor(2)
+		#print 'cluster: ', len(hitCluster)
 		#print '----'
 
 		for pos in hitCluster:
@@ -109,7 +122,7 @@ def readEvent():
 
             allHitPos.append( [pos[0], pos[1], pos[2]] )
 
-        quantile = 0.1
+        quantile = 0.025
 
         Xdata = StandardScaler().fit_transform(allHitPos)
         bandwidth = cluster.estimate_bandwidth(Xdata, quantile=quantile)
@@ -179,7 +192,7 @@ if __name__=='__main__':
 		fileName = "PDG211_50GeV_endcap_rec_0.slcio"
 	
 	
-	r = ROOT.TRandom(0)
+	#r = ROOT.TRandom(0)
 	eventNumber = 1
 	reader = LcioReader( fileName )
 	print 'Loaded file: ', fileName
