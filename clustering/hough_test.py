@@ -43,9 +43,9 @@ from itertools import cycle, islice
 ########################################################################################################################
 hits_pos = []
 
-XMAX = 20
+XMAX = 15
 sigmaX = 0.5
-sigmaY = 2
+sigmaY = 1
 
 for x in range(0, XMAX) :
 	randx = np.random.normal(0, sigmaX)
